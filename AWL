@@ -1,0 +1,68 @@
+A     #Enable
+      AN    #Enable_Mem
+      =     #Enable_Edge
+      A     #Enable
+      =     #Enable_Mem
+      A     #Enable_Edge
+      JCN   No_Reset
+      L     0
+      T     #Counter
+      R     #State
+      R     #Done
+No_Reset : NOP 0
+      A     #Trig
+      AN    #Trig_Mem
+      =     #Edge
+      A     #Trig
+      =     #Trig_Mem
+      L     #Counter
+      L     #Num_Pulses
+      <I
+      =     #Edge_Enable
+      A     #Edge
+      A     #Edge_Enable
+      X     #State
+      =     #State
+      A     #Edge
+      A     #Edge_Enable
+      AN    #State
+      JCN   No_Count
+      L     #Counter
+      L     1
+      +I
+      T     #Counter
+
+No_Count : NOP 0
+
+      L     #Counter
+      L     #Num_Pulses
+      >=I
+      =     #Done
+
+      A     #Enable
+      A     #State
+      =     #Pulse_Out
+
+      L     #Num_Pulses
+      L     0
+      >I
+      JCN   Fin_Escala
+
+      L     #Counter
+      L     100
+      *I
+      L     #Num_Pulses
+      /I
+      T     #Animacion
+
+Fin_Escala : NOP 0
+
+
+
+      A     "xCicloCompleto"
+      JCN   No_Reset_Anim
+
+      L     0
+      T     #Animacion
+
+No_Reset_Anim : NOP 0
