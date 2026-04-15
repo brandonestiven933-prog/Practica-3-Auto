@@ -1,0 +1,72 @@
+#TimerPulsos(
+IN := #Enable AND NOT #Q AND (#Cont < 12),
+PT := #TPulsos,
+Q => #Q
+);
+#Timer_3s(
+IN := "xLlenandoBotella",
+PT := #TEspera
+);
+"xLlenadoFinalizado" := #Timer_3s.Q;
+#tBajar(
+        IN := "xBajarDispensador",
+        PT := T#500ms
+);
+#tSubir(
+        IN := "xSubirDispensador",
+        PT := T#500ms
+);
+IF #Reset THEN
+    #Cont := 0;
+    #FlagF := FALSE;
+    #Flanco := FALSE;
+ELSE
+    IF #In AND NOT #Flanco AND (#Cont < 12) THEN
+        #Cont := #Cont + 1;
+        #Flanco := TRUE;
+    END_IF;
+    
+    IF NOT #In THEN
+        #Flanco := FALSE;
+    END_IF;
+    
+    #FlagF := (#Cont = 11);
+END_IF;
+
+IF #FlagF AND NOT "xServo_ON" THEN
+    "xCicloCompleto" := TRUE;
+END_IF;
+#Contss := #Cont;
+
+
+// SALIDAS
+
+CASE #Contss OF
+    0:
+        "xAgua1" := FALSE;
+        "xAgua2" := FALSE;
+    1:
+        "xAgua1" := TRUE;
+        "xAgua2" := FALSE;
+    ELSE
+        "xAgua1" := TRUE;
+        "xAgua2" := TRUE;
+END_CASE;
+
+
+// HMI
+
+"xStart" := "Start_HMI";
+"xPE" := "PE_HMI";
+"xStop" := "Stop_HMI";
+
+
+// POSICION DISPENSADOR
+
+IF "xBajarDispensador" THEN
+    #Pos_Dispensador := UDINT_TO_INT(TIME_TO_UDINT(#tBajar.ET) / 5);
+ELSIF "xSubirDispensador" THEN
+    #Pos_Dispensador := 100 - UDINT_TO_INT(TIME_TO_UDINT(#tSubir.ET) / 5);
+ELSE
+    #Pos_Dispensador := 0;
+END_IF;
